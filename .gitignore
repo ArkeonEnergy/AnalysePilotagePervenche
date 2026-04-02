@@ -1,0 +1,16 @@
+# --- Dossiers demandés ---
+/data/
+/reports/
+/ResultsData_jumeau_num/
+/ResultsData_site/
+.venv/
+.vscode/
+
+# --- Python (Caches et fichiers temporaires) ---
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.mypy_cache/
+
+*.xlsx
