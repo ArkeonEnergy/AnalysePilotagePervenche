@@ -25,9 +25,9 @@ def get_and_save_site_data_to_csv(startdate):
 
     DATA_DIR = PROJECT_ROOT / "data"
     ENEDIS_DIR = DATA_DIR / "ENEDIS"
-    SITEDATA_DIR = PROJECT_ROOT / "ResultsData_Site"
-    PILOTAGE_DIR = PROJECT_ROOT.parent
-    SITEDATADIR_PILOTAGE = PILOTAGE_DIR / "ResultsData_Site"
+    SITEDATA_DIR = PROJECT_ROOT / "ResultsData_site"
+    PILOTAGE_DIR = PROJECT_ROOT / "ResultsData_pilotage"
+    #SITEDATADIR_PILOTAGE = PILOTAGE_DIR / "ResultsData_site"
 
     startdate_str = startdate.strftime("%Y-%m-%d")
     enddate = startdate + timedelta(days=1)
@@ -35,7 +35,7 @@ def get_and_save_site_data_to_csv(startdate):
     
     csv_path = DATA_DIR / f"data_AllData_combined_{startdate_str}_to_{enddate_str}.csv"
     csv_output_path = SITEDATA_DIR / f"ResultsTable_{startdate.strftime('%d%b%y').upper()}_site.csv"
-    csv_output_path_pilotage = SITEDATADIR_PILOTAGE / f"ResultsTable_{startdate.strftime('%d%b%y').upper()}_site_ssbsl.csv"
+    csv_output_path_pilotage = PILOTAGE_DIR / f"ResultsTable_{startdate.strftime('%d%b%y').upper()}_site_ssbsl.csv"
     json_path = ENEDIS_DIR / f"metering_data_{startdate_str}_to_{enddate_str}.json"
 
     # CELL 2: Data Acquisition from InfluxDB and ENEDIS API
@@ -46,12 +46,6 @@ def get_and_save_site_data_to_csv(startdate):
     # ENEDIS data is resampled from 5-minute intervals to hourly aggregations.
 
     # IMPORT DATA FROM DATABASE AND ENEDIS API
-    startdate_influx = startdate - np.timedelta64(1, 'h')
-    enddate_influx   = enddate - np.timedelta64(1, 'h')
-
-    startdate_influx_str = startdate_influx.strftime("%Y-%m-%d %H:%M")
-    enddate_influx_str   = enddate_influx.strftime("%Y-%m-%d %H:%M")
-
     print(f"Acquisition de données pour la période : {startdate_str} au {enddate_str}")
     # print(f"Fichier de données InfluxDB : {csv_path.name}")
     # print(f"Fichier de données ENEDIS : {json_path.name}")
@@ -95,9 +89,6 @@ def get_and_save_site_data_to_csv(startdate):
         # Load the newly created file
         df = pd.read_csv(csv_path)
         #print("Acquisition de données terminée et chargée.")
-
-
-    # Import electric consulmption data from ENEDIS api or file if already exists
 
     if os.path.exists(json_path):
         #print(f"Le fichier données ENEDIS existe déjà. Chargement des données existantes...")
@@ -146,7 +137,9 @@ def get_and_save_site_data_to_csv(startdate):
     timeStep_hours  = 60/3600
 
     # Convert _time to datetime and remove timezone awareness
+    df['_time'] = pd.to_datetime(df['_time']).dt.tz_convert('Europe/Paris')
     df['_time'] = pd.to_datetime(df['_time']).dt.tz_localize(None)
+
 
     # Filter data to keep only dates strictly before enddate
     df = df[df['_time'] < enddate]

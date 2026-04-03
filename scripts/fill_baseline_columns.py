@@ -10,8 +10,8 @@ if __name__ == "__main__":
 
     from datetime import datetime, timedelta
 
-    startdate = pd.Timestamp("2026-03-04")
-    enddate   = pd.Timestamp("2026-03-04")
+    startdate = pd.Timestamp("2026-03-27")
+    enddate   = pd.Timestamp("2026-04-02")
     nowdate = pd.Timestamp.now().normalize()
 
     startdate_str = startdate.strftime("%Y-%m-%d")
@@ -22,7 +22,7 @@ if __name__ == "__main__":
     SITEDATA_DIR = PROJECT_ROOT / "ResultsData_site"
     JUMEAUNUM_DATA_DIR = PROJECT_ROOT / "ResultsData_jumeau_num"
     PILOTAGE_DIR = PROJECT_ROOT.parent
-    SITEDATADIR_PILOTAGE = PILOTAGE_DIR / "ResultsData_Site"
+    SITEDATADIR_PILOTAGE = PROJECT_ROOT / "ResultsData_pilotage"
 
     # Add project root to sys.path for module imports
     current_date = startdate

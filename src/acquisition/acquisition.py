@@ -55,22 +55,22 @@ def build_flux_query(
         filter_condition = f'r._measurement == "{measurement}"'
 
     # Convert France timezone (CET/CEST) to UTC for InfluxDB
-    france_tz = pytz.timezone("Europe/Paris")
-    start_dt = pd.to_datetime(start_time).replace(tzinfo=france_tz).astimezone(pytz.UTC)
-    stop_dt = pd.to_datetime(stop_time).replace(tzinfo=france_tz).astimezone(pytz.UTC)
-    
+    # Assuming start_time is a string like "2026-03-30 10:00:00"
+    start_dt = pd.to_datetime(start_time)
+    stop_dt = pd.to_datetime(stop_time)
+
+    # Formatting for InfluxDB/API
     start_time_utc = start_dt.strftime("%Y-%m-%dT%H:%M:%SZ")
     stop_time_utc = stop_dt.strftime("%Y-%m-%dT%H:%M:%SZ")
 
     return (
         f'from(bucket: "{bucket}") '
-        f'|> range(start: {start_time_utc}, stop: {stop_time_utc})'
+        f'|> range(start: {start_time}, stop: {stop_time})'
         f'|> filter(fn: (r) => {filter_condition})'
         f'|> drop(columns: ["_measurement", "result", "table", "_start", "_stop"])'
         f'|> aggregateWindow(every: {data_step}, fn: last, createEmpty: false)'
         f'|> pivot(rowKey: ["_time"], columnKey: ["_field"], valueColumn: "_value")'
-        f'|> timeShift(duration: 1h)'
-        f'|> timeShift(duration: -1m)'
+        f'|> timeShift(duration: -{data_step})'
         f'|> yield(name: "pivoted")'
     )
 
@@ -152,10 +152,10 @@ def get_data(
     output_filename = f"data_{influx.bucket}_{start_date}_to_{end_date}.csv"
 
     if query_mode.lower() == "hourly":
-        date_range = pd.date_range(start=start_dt, end=end_dt, freq="H")
+        date_range = pd.date_range(start=start_dt, end=end_dt, freq="H", tz="Europe/Paris").tz_convert("UTC")
         period_name = "hour"
     else:
-        date_range = pd.date_range(start=start_dt, end=end_dt, freq="D")
+        date_range = pd.date_range(start=start_dt, end=end_dt, freq="D", tz="Europe/Paris").tz_convert("UTC")
         period_name = "day"
 
     client = InfluxDBClient(url=influx.url, token=influx.token, org=influx.org)
@@ -163,12 +163,11 @@ def get_data(
 
     df_list: List[pd.DataFrame] = []
     for current_time in date_range:
+        start_time = current_time.isoformat()
         if query_mode.lower() == "hourly":
-            start_time = current_time.strftime("%Y-%m-%dT%H:00:00Z")
-            stop_time = (current_time + pd.Timedelta(hours=1)).strftime("%Y-%m-%dT%H:00:00Z")
+            stop_time = (current_time + pd.Timedelta(hours=1)).isoformat()
         else:
-            start_time = current_time.strftime("%Y-%m-%dT00:00:00Z")
-            stop_time = (current_time + pd.Timedelta(days=1)).strftime("%Y-%m-%dT00:00:00Z")
+            stop_time = (current_time + pd.Timedelta(days=1)).isoformat()
 
         df_period = process_period(
             query_api=query_api,
@@ -358,8 +357,8 @@ def run_acquisition(
 if __name__ == "__main__":
     example_intervals = [
         {
-            "start_date": "2025-11-16",
-            "end_date": "2025-11-23",
+            "start_date": "2026-04-02",
+            "end_date": "2026-04-03",
             "description": "Example interval",
         }
     ]
@@ -396,7 +395,7 @@ if __name__ == "__main__":
             "PAC2_general_alarm2",
         ],
         use_specific_fields=True,
-        output_dir="../data",
+        output_dir="./data",
         query_mode="daily",
         data_step="1m",
     )

@@ -91,6 +91,19 @@ def obtenir_parametres_electriques(input_date):
     }.get(annee, 0.77)
 
 
+    reelle_capa_hpe = {
+        2024: 0.15 * prix_capa_kw[2024],
+        2025: 0.25 * prix_capa_kw[2025],
+        2026: 0.3
+    }.get(annee, 0.3)
+
+    reelle_capa_hce = {
+        2024: 0.1 * prix_capa_kw[2024],
+        2025: 0.18 * prix_capa_kw[2025],
+        2026: 0.25
+    }.get(annee, 0.25)
+
+
 
     # --- 3. Logique d'extraction des paliers ---
     
@@ -121,6 +134,8 @@ def obtenir_parametres_electriques(input_date):
         # Capacité (Calculé selon l'année)
         "reelle_capacite_hph": reelle_capa_hph,
         "reelle_capacite_hch": reelle_capa_hch,
+        "reelle_capacite_hpe": reelle_capa_hpe,
+        "reelle_capacite_hce": reelle_capa_hce,
         
         # CEE & ACCISE (Convertis en EUR/kWh pour faciliter le calcul final)
         "cee_mwh": 7.5,
