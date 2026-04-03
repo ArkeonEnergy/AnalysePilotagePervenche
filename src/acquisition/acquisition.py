@@ -151,11 +151,14 @@ def get_data(
     output_dir = Path(output_dir)
     output_filename = f"data_{influx.bucket}_{start_date}_to_{end_date}.csv"
 
+    start_utc = pd.to_datetime(start_date).tz_localize("Europe/Paris").tz_convert("UTC")
+    end_utc = pd.to_datetime(end_date).tz_localize("Europe/Paris").tz_convert("UTC")
+
     if query_mode.lower() == "hourly":
-        date_range = pd.date_range(start=start_dt, end=end_dt, freq="H", tz="Europe/Paris").tz_convert("UTC")
+        date_range = pd.date_range(start=start_utc, end=end_utc, freq="H")
         period_name = "hour"
     else:
-        date_range = pd.date_range(start=start_dt, end=end_dt, freq="D", tz="Europe/Paris").tz_convert("UTC")
+        date_range = pd.date_range(start=start_utc, end=end_utc, freq="D")        
         period_name = "day"
 
     client = InfluxDBClient(url=influx.url, token=influx.token, org=influx.org)
