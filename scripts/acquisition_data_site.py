@@ -11,8 +11,8 @@ if __name__ == "__main__":
     from src.acquisition.get_and_save_site_data_to_csv import get_and_save_site_data_to_csv
     from datetime import datetime, timedelta
 
-    startdate = pd.Timestamp("2026-03-27")
-    enddate   = pd.Timestamp("2026-04-02")
+    startdate = pd.Timestamp("2026-04-08")
+    enddate   = pd.Timestamp("2026-04-09")
     nowdate = pd.Timestamp.now().normalize()
 
     startdate_str = startdate.strftime("%Y-%m-%d")
