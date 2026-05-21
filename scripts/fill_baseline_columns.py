@@ -10,8 +10,8 @@ if __name__ == "__main__":
 
     from datetime import datetime, timedelta
 
-    startdate = pd.Timestamp("2026-03-27")
-    enddate   = pd.Timestamp("2026-04-02")
+    startdate = pd.Timestamp("2026-04-17")
+    enddate   = pd.Timestamp("2026-04-23")
     nowdate = pd.Timestamp.now().normalize()
 
     startdate_str = startdate.strftime("%Y-%m-%d")
